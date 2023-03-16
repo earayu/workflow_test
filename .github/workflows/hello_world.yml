@@ -15,3 +15,18 @@ jobs:
           echo "The time is $(date +%s).\n"
           sleep 3
           echo "The time is $(date +%s).\n"
+  like-pizza:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.comment.body == 'I like pizza'}}
+    steps:
+      - name: Like pizza
+        uses: actions/github-script@v4
+        with:
+          script: |
+            const {owner, repo} = context.issue
+            github.reactions.createForIssueComment({
+              owner,
+              repo,
+              comment_id: context.payload.comment.id,
+              content: "+1",
+            });

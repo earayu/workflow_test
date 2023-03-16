@@ -11,8 +11,7 @@ jobs:
     steps:
       - name: Step 1
         run:
-          echo "Hello, world 123!"
-          # print precise time, scale to second
-          echo "The time is $(date +%s)."
+          echo "Hello, world 123!\n"
+          echo "The time is $(date +%s).\n"
           sleep 3
-          echo "The time is $(date +%s)."
+          echo "The time is $(date +%s).\n"

@@ -3,8 +3,6 @@ name: Hello World Workflow
 on:
   push:
   workflow_dispatch:
-  issue_comment:
-    types: [created, edited]
 
 
 jobs:
@@ -12,7 +10,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Step 1
-        run: echo "Hello, world 123!"
-      - name: Step 2
-#        echo issue comment
-        run: echo ${{ github.event.comment.body }}
+        run:
+          echo "Hello, world 123!"
+          echo "The time is $(date)."
+          sleep 3
+          echo "The time is $(date)."

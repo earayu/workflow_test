@@ -10,4 +10,5 @@ jobs:
       - run: gh issue comment $ISSUE --body "Thank you for opening this issue!"
         env:
           GITHUB_TOKEN: ${{ secrets.ISSUE_COMMENT }}
+          GH_TOKEN: ${{ secrets.ISSUE_COMMENT }}
           ISSUE: ${{ github.event.issue.html_url }}

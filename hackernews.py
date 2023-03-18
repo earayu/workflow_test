@@ -71,10 +71,9 @@ def main():
     hackernews_articles = get_hackernews()
     summaries = []
 
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [executor.submit(process_article, article, title) for article, title in hackernews_articles]
-        for future in concurrent.futures.as_completed(futures):
-            summaries.append(future.result())
+    for article, title in hackernews_articles:
+        eng_title, chi_title, summary = process_article(article, title)
+        summaries.append((eng_title, chi_title, summary))
 
     for eng_title, chi_title, summary in summaries:
         logging.info(f"English Title: {eng_title}")

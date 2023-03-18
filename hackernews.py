@@ -21,7 +21,7 @@ def get_hackernews():
     top_stories = soup.select(".titleline > a")
 
     article_contents = []
-    for story in top_stories[:5]:
+    for story in top_stories[:1]:
         article_url = story["href"]
         article_title = story.text
         logging.info(f"Fetching article content from {article_url}")
@@ -65,20 +65,18 @@ def process_article(article, title):
     article_chunks = split_text(article, max_tokens=1000)
     chunk_summaries = [summarize_text(chunk) for chunk in article_chunks]
     combined_summary = " ".join
-    return title, chinese_title, chunk_summaries
+    return title, chinese_title, combined_summary
 
 def main():
     hackernews_articles = get_hackernews()
     summaries = []
 
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        futures = [executor.submit(process_article, article, title) for article, title in hackernews_articles]
-        for future in concurrent.futures.as_completed(futures):
-            summaries.append(future.result())
+    for article, title in hackernews_articles:
+        (title, chinese_title, summary) = process_article(article, title)
 
-    for eng_title, chi_title, summary in summaries:
-        logging.info(f"English Title: {eng_title}")
-        logging.info(f"Chinese Title: {chi_title}")
+        logging.info(f"=================================================================================================")
+        logging.info(f"English Title: {title}")
+        logging.info(f"Chinese Title: {chinese_title}")
         logging.info(f"Chinese Summary: {summary}")
 
 if __name__ == "__main__":

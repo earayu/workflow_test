@@ -65,15 +65,16 @@ def process_article(article, title):
     article_chunks = split_text(article, max_tokens=1000)
     chunk_summaries = [summarize_text(chunk) for chunk in article_chunks]
     combined_summary = " ".join
-    return eng_title, chi_title, summary
+    return title, chinese_title, chunk_summaries
 
 def main():
     hackernews_articles = get_hackernews()
     summaries = []
 
-    for article, title in hackernews_articles:
-        eng_title, chi_title, summary = process_article(article, title)
-        summaries.append((eng_title, chi_title, summary))
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = [executor.submit(process_article, article, title) for article, title in hackernews_articles]
+        for future in concurrent.futures.as_completed(futures):
+            summaries.append(future.result())
 
     for eng_title, chi_title, summary in summaries:
         logging.info(f"English Title: {eng_title}")

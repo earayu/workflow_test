@@ -13,15 +13,25 @@ def get_hackernews():
     url = "https://news.ycombinator.com/"
     response = requests.get(url)
     soup = BeautifulSoup(response.text, "html.parser")
-    titles = soup.select(".titleline > a")
-    return [title.text for title in titles]
+    top_stories = soup.select(".titleline > a")
+
+    article_contents = []
+    for story in top_stories[:5]:
+        article_url = story["href"]
+        article_response = requests.get(article_url)
+        article_soup = BeautifulSoup(article_response.text, "html.parser")
+        article_content = article_soup.get_text()
+        article_contents.append(article_content)
+
+    return article_contents
+
 
 
 def summarize_text(text):
     response = openai.Completion.create(
         engine="text-davinci-002",
         prompt=f"Please summarize the following text: {text}",
-        max_tokens=50,
+        max_tokens=50000,
         n=1,
         stop=None,
         temperature=0.5,
@@ -32,7 +42,7 @@ def translate_to_chinese(text):
     response = openai.Completion.create(
         engine="text-davinci-002",
         prompt=f"Please translate the following text to Chinese: {text}",
-        max_tokens=100,
+        max_tokens=10000,
         n=1,
         stop=None,
         temperature=0.5,

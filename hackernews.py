@@ -4,11 +4,16 @@ import schedule
 import time
 import openai
 import os
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Initialize OpenAI API
 openai.api_key = os.environ["OPENAI_API_KEY"]
 
 def get_hackernews():
+    logging.info("Fetching Hacker News articles...")
     url = "https://news.ycombinator.com/"
     response = requests.get(url)
     soup = BeautifulSoup(response.text, "html.parser")
@@ -17,6 +22,7 @@ def get_hackernews():
     article_contents = []
     for story in top_stories[:5]:
         article_url = story["href"]
+        logging.info(f"Fetching article content from {article_url}")
         article_response = requests.get(article_url)
         article_soup = BeautifulSoup(article_response.text, "html.parser")
         article_content = article_soup.get_text()
@@ -25,6 +31,7 @@ def get_hackernews():
     return article_contents
 
 def summarize_text(text):
+    logging.info("Summarizing article content...")
     response = openai.Completion.create(
         engine="davinci-codex",
         prompt=f"Please summarize the following text: {text}",
@@ -43,6 +50,7 @@ def main():
     hackernews_articles = get_hackernews()
     summaries = []
     for article in hackernews_articles:
+        logging.info("Processing article...")
         article_chunks = split_text(article, max_tokens=1000)
         chunk_summaries = [summarize_text(chunk) for chunk in article_chunks]
         combined_summary = " ".join(chunk_summaries)

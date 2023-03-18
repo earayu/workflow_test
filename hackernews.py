@@ -64,12 +64,11 @@ def process_article(article, title):
     chinese_title = translate_to_chinese(title)
     article_chunks = split_text(article, max_tokens=1000)
     chunk_summaries = [summarize_text(chunk) for chunk in article_chunks]
-    combined_summary = " ".join
+    combined_summary = " ".join(chunk_summaries)
     return title, chinese_title, combined_summary
 
 def main():
     hackernews_articles = get_hackernews()
-    summaries = []
 
     for article, title in hackernews_articles:
         (title, chinese_title, summary) = process_article(article, title)

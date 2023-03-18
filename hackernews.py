@@ -20,7 +20,7 @@ def get_hackernews():
     top_stories = soup.select(".titleline > a")
 
     article_contents = []
-    for story in top_stories[:1]:
+    for story in top_stories[:5]:
         article_url = story["href"]
         logging.info(f"Fetching article content from {article_url}")
         article_response = requests.get(article_url)
@@ -57,15 +57,21 @@ def split_text(text, max_tokens):
     tokens = text.split()
     return [" ".join(tokens[i:i+max_tokens]) for i in range(0, len(tokens), max_tokens)]
 
+def process_article(article):
+    logging.info("Processing article...")
+    article_chunks = split_text(article, max_tokens=1000)
+    chunk_summaries = [summarize_text(chunk) for chunk in article_chunks]
+    combined_summary = " ".join(translate_to_chinese(chunk_summaries))
+    return combined_summary
+
 def main():
     hackernews_articles = get_hackernews()
     summaries = []
-    for article in hackernews_articles:
-        logging.info("Processing article...")
-        article_chunks = split_text(article, max_tokens=1000)
-        chunk_summaries = [summarize_text(chunk) for chunk in article_chunks]
-        combined_summary = " ".join(translate_to_chinese(chunk_summaries))
-        summaries.append(combined_summary)
+
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        futures = [executor.submit(process_article, article) for article in hackernews_articles]
+        for future in concurrent.futures.as_completed(futures):
+            summaries.append(future.result())
 
     logging.info(f"Summaries: {summaries}")
 

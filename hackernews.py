@@ -5,6 +5,8 @@ import time
 import openai
 import os
 import logging
+import concurrent.futures
+
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')

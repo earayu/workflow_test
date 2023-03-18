@@ -5,7 +5,6 @@ import time
 import openai
 import os
 import logging
-from concurrent.futures import ThreadPoolExecutor
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -20,8 +19,16 @@ def get_hackernews():
     soup = BeautifulSoup(response.text, "html.parser")
     top_stories = soup.select(".titleline > a")
 
-    article_titles = [story.text for story in top_stories[:5]]
-    return article_titles
+    article_contents = []
+    for story in top_stories[:1]:
+        article_url = story["href"]
+        logging.info(f"Fetching article content from {article_url}")
+        article_response = requests.get(article_url)
+        article_soup = BeautifulSoup(article_response.text, "html.parser")
+        article_content = article_soup.get_text()
+        article_contents.append(article_content)
+
+    return article_contents
 
 def summarize_text(text):
     logging.info("Summarizing article content...")
@@ -39,25 +46,28 @@ def translate_to_chinese(text):
     response = openai.Completion.create(
         engine="davinci-codex",
         prompt=f"Translate the following English text to Chinese: {text}",
-        max_tokens=100,
+        max_tokens=1000,
         n=1,
         stop=None,
         temperature=0.5,
     )
     return response.choices[0].text.strip()
 
-def process_article(title):
-    summary = summarize_text(title)
-    chinese_summary = translate_to_chinese(summary)
-    return chinese_summary
+def split_text(text, max_tokens):
+    tokens = text.split()
+    return [" ".join(tokens[i:i+max_tokens]) for i in range(0, len(tokens), max_tokens)]
 
 def main():
-    hackernews_titles = get_hackernews()
+    hackernews_articles = get_hackernews()
+    summaries = []
+    for article in hackernews_articles:
+        logging.info("Processing article...")
+        article_chunks = split_text(article, max_tokens=1000)
+        chunk_summaries = [summarize_text(chunk) for chunk in article_chunks]
+        combined_summary = " ".join(translate_to_chinese(chunk_summaries))
+        summaries.append(combined_summary)
 
-    with ThreadPoolExecutor() as executor:
-        chinese_summaries = list(executor.map(process_article, hackernews_titles))
-
-    logging.info(f"Chinese summaries: {chinese_summaries}")
+    logging.info(f"Summaries: {summaries}")
 
 if __name__ == "__main__":
     main()

@@ -21,7 +21,7 @@ def get_hackernews():
     top_stories = soup.select(".titleline > a")
 
     article_contents = []
-    for story in top_stories[:1]:
+    for story in top_stories[:20]:
         article_url = story["href"]
         article_title = story.text
         logging.info(f"Fetching article content from {article_url}")
@@ -60,8 +60,9 @@ def split_text(text, max_tokens):
     return [" ".join(tokens[i:i+max_tokens]) for i in range(0, len(tokens), max_tokens)]
 
 def process_article(article, title):
-    logging.info("Processing article...")
+    logging.info("Processing article: " + title)
     chinese_title = translate_to_chinese(title)
+    logging.info(f"Chinese Title: {chinese_title}")
     article_chunks = split_text(article, max_tokens=1000)
     chunk_summaries = [summarize_text(chunk) for chunk in article_chunks]
     combined_summary = " ".join(translate_to_chinese(chunk_summaries))
@@ -71,11 +72,8 @@ def main():
     hackernews_articles = get_hackernews()
 
     for article, title in hackernews_articles:
-        (title, chinese_title, summary) = process_article(article, title)
-
         logging.info(f"=================================================================================================")
-        logging.info(f"English Title: {title}")
-        logging.info(f"Chinese Title: {chinese_title}")
+        (title, chinese_title, summary) = process_article(article, title)
         logging.info(f"Chinese Summary: {summary}")
 
 if __name__ == "__main__":

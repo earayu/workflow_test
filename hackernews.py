@@ -28,7 +28,7 @@ def summarize_text(text):
     response = openai.Completion.create(
         engine="davinci-codex",
         prompt=f"Please summarize the following text: {text}",
-        max_tokens=2000,
+        max_tokens=1000,
         n=1,
         stop=None,
         temperature=0.5,
@@ -43,7 +43,7 @@ def main():
     hackernews_articles = get_hackernews()
     summaries = []
     for article in hackernews_articles:
-        article_chunks = split_text(article, max_tokens=2000)
+        article_chunks = split_text(article, max_tokens=1000)
         chunk_summaries = [summarize_text(chunk) for chunk in article_chunks]
         combined_summary = " ".join(chunk_summaries)
         summaries.append(combined_summary)
